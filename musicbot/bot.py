@@ -34,7 +34,6 @@ from .opus_loader import load_opus_lib
 from .constants import VERSION as BOTVERSION
 from .constants import DISCORD_MSG_CHAR_LIMIT, AUDIO_CACHE_PATH
 
-
 load_opus_lib()
 
 
@@ -259,12 +258,12 @@ class MusicBot(discord.Client):
                     break
                 except:
                     traceback.print_exc()
-                    print("Failed to connect, retrying (%s/%s)..." % (x+1, retries))
+                    print("Failed to connect, retrying (%s/%s)..." % (x + 1, retries))
                     await asyncio.sleep(1)
                     await self.ws.voice_state(server.id, None, self_mute=True)
                     await asyncio.sleep(1)
 
-                    if x == retries-1:
+                    if x == retries - 1:
                         raise exceptions.HelpfulError(
                             "Cannot establish connection to voice chat.  "
                             "Something may be blocking outgoing UDP connections.",
@@ -401,7 +400,9 @@ class MusicBot(discord.Client):
                     player.voice_client.channel.name, entry.title)
 
             if self.server_specific_data[channel.server]['last_np_msg']:
-                self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_edit_message(last_np_msg, newmsg, send_if_fail=True)
+                self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_edit_message(last_np_msg,
+                                                                                                        newmsg,
+                                                                                                        send_if_fail=True)
             else:
                 self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel, newmsg)
 
@@ -418,7 +419,8 @@ class MusicBot(discord.Client):
         if not player.playlist.entries and not player.current_entry and self.config.auto_playlist:
             while self.autoplaylist:
                 song_url = choice(self.autoplaylist)
-                info = await self.downloader.safe_extract_info(player.playlist.loop, song_url, download=False, process=False)
+                info = await self.downloader.safe_extract_info(player.playlist.loop, song_url, download=False,
+                                                               process=False)
 
                 if not info:
                     self.autoplaylist.remove(song_url)
@@ -466,7 +468,6 @@ class MusicBot(discord.Client):
             game = discord.Game(name=name)
 
         await self.change_status(game)
-
 
     async def safe_send_message(self, dest, content, *, tts=False, expire_in=0, also_delete=None, quiet=False):
         msg = None
@@ -528,12 +529,12 @@ class MusicBot(discord.Client):
         if self.user.bot:
             return await super().edit_profile(**fields)
         else:
-            return await super().edit_profile(self.config._password,**fields)
+            return await super().edit_profile(self.config._password, **fields)
 
     def _cleanup(self):
         try:
             self.loop.run_until_complete(self.logout())
-        except: # Can be ignored
+        except:  # Can be ignored
             pass
 
         pending = asyncio.Task.all_tasks()
@@ -543,7 +544,7 @@ class MusicBot(discord.Client):
             gathered.cancel()
             self.loop.run_until_complete(gathered)
             gathered.exception()
-        except: # Can be ignored
+        except:  # Can be ignored
             pass
 
     # noinspection PyMethodOverriding
@@ -881,7 +882,7 @@ class MusicBot(discord.Client):
                 player.playlist.loop,
                 song_url,
                 download=False,
-                process=True,    # ASYNC LAMBDAS WHEN
+                process=True,  # ASYNC LAMBDAS WHEN
                 on_error=lambda e: asyncio.ensure_future(
                     self.safe_send_message(channel, "```\n%s\n```" % e, expire_in=120), loop=self.loop),
                 retry_on_error=True
@@ -929,7 +930,8 @@ class MusicBot(discord.Client):
 
             if info['extractor'].lower() in ['youtube:playlist', 'soundcloud:set', 'bandcamp:album']:
                 try:
-                    return await self._cmd_play_playlist_async(player, channel, author, permissions, song_url, info['extractor'])
+                    return await self._cmd_play_playlist_async(player, channel, author, permissions, song_url,
+                                                               info['extractor'])
                 except exceptions.CommandError:
                     raise
                 except Exception as e:
@@ -1075,7 +1077,6 @@ class MusicBot(discord.Client):
             except Exception:
                 traceback.print_exc()
                 raise exceptions.CommandError('Error handling playlist %s queuing.' % playlist_url, expire_in=30)
-
 
         songs_processed = len(entries_added)
         drop_count = 0
@@ -1369,7 +1370,7 @@ class MusicBot(discord.Client):
 
         player.playlist.shuffle()
 
-        cards = [':spades:',':clubs:',':hearts:',':diamonds:']
+        cards = [':spades:', ':clubs:', ':hearts:', ':diamonds:']
         hand = await self.send_message(channel, ' '.join(cards))
         await asyncio.sleep(0.6)
 
@@ -1400,7 +1401,7 @@ class MusicBot(discord.Client):
 
         Skips the current song when enough votes are cast.
         """
-        #edit END
+        # edit END
 
         if player.is_stopped:
             raise exceptions.CommandError("Can't skip! The player is not playing!", expire_in=20)
@@ -1544,10 +1545,12 @@ class MusicBot(discord.Client):
             if relative:
                 raise exceptions.CommandError(
                     'Unreasonable volume change provided: {}{:+} -> {}%.  Provide a change between {} and {:+}.'.format(
-                        old_volume, vol_change, old_volume + vol_change, 1 - old_volume, 100 - old_volume), expire_in=20)
+                        old_volume, vol_change, old_volume + vol_change, 1 - old_volume, 100 - old_volume),
+                    expire_in=20)
             else:
                 raise exceptions.CommandError(
-                    'Unreasonable volume provided: {}%. Provide a value between 1 and 100.'.format(new_volume), expire_in=20)
+                    'Unreasonable volume provided: {}%. Provide a value between 1 and 100.'.format(new_volume),
+                    expire_in=20)
 
     async def cmd_queue(self, channel, player):
         """
@@ -1681,22 +1684,24 @@ class MusicBot(discord.Client):
                 return await self.cmd_pldump(channel, info.get(''))
 
         linegens = defaultdict(lambda: None, **{
-            "youtube":    lambda d: 'https://www.youtube.com/watch?v=%s' % d['id'],
+            "youtube": lambda d: 'https://www.youtube.com/watch?v=%s' % d['id'],
             "soundcloud": lambda d: d['url'],
-            "bandcamp":   lambda d: d['url']
+            "bandcamp": lambda d: d['url']
         })
 
         exfunc = linegens[info['extractor'].split(':')[0]]
 
         if not exfunc:
-            raise exceptions.CommandError("Could not extract info from input url, unsupported playlist type.", expire_in=25)
+            raise exceptions.CommandError("Could not extract info from input url, unsupported playlist type.",
+                                          expire_in=25)
 
         with BytesIO() as fcontent:
             for item in info['entries']:
                 fcontent.write(exfunc(item).encode('utf8') + b'\n')
 
             fcontent.seek(0)
-            await self.send_file(channel, fcontent, filename='playlist.txt', content="Here's the url dump for <%s>" % song_url)
+            await self.send_file(channel, fcontent, filename='playlist.txt',
+                                 content="Here's the url dump for <%s>" % song_url)
 
         return Response(":mailbox_with_mail:", delete_after=20)
 
@@ -1757,7 +1762,6 @@ class MusicBot(discord.Client):
 
         return Response(":mailbox_with_mail:", delete_after=20)
 
-
     async def cmd_perms(self, author, channel, server, permissions):
         """
         Usage:
@@ -1777,6 +1781,40 @@ class MusicBot(discord.Client):
         await self.send_message(author, '\n'.join(lines))
         return Response(":mailbox_with_mail:", delete_after=20)
 
+    async def cmd_remove(self, player, leftover_args, index):
+        """
+        Usage:
+            {command_prefix}remove [index]
+        Remove a song at the given index from the queue. 
+        Use {command_prefix}queue to see the list of queued songs and their indices.
+        """
+        try:
+            index = int(' '.join([index, *leftover_args]))
+            playlist_size = len(player.playlist.entries)
+            if index > playlist_size:
+                if (playlist_size > 1):
+                    reply_text = "There are only %s songs in the queue!"
+                    reply_text %= (playlist_size)
+                    return Response(reply_text, reply=True, delete_after=20)
+                elif (playlist_size == 1):
+                    reply_text = "There is only %s song in the queue!"
+                    reply_text %= (playlist_size)
+                    return Response(reply_text, reply=True, delete_after=20)
+                else:
+                    reply_text = "There aren't any songs in the queue!"
+                    return Response(reply_text, reply=True, delete_after=20)
+
+
+            entry = await player.playlist.remove_entry(index)
+            reply_text = "Removed **%s** from the playlist"
+            reply_text %= (entry.title)
+
+            return Response(reply_text, reply=True, delete_after=20)
+        except ValueError:
+            reply_text = "Must specify an index to remove (AKA a number)"
+
+            return Response(reply_text, reply=True, delete_after=20)
+
     @owner_only
     async def cmd_reloadperm(self, author, channel, server, permissions):
         """
@@ -1792,7 +1830,6 @@ class MusicBot(discord.Client):
         except Exception as e:
             raise exceptions.CommandError(e, expire_in=20)
         return
-
 
     @owner_only
     async def cmd_setname(self, leftover_args, name):
@@ -1858,7 +1895,6 @@ class MusicBot(discord.Client):
             raise exceptions.CommandError("Unable to change avatar: %s" % e, expire_in=20)
 
         return Response(":ok_hand:", delete_after=20)
-
 
     async def cmd_disconnect(self, server):
         await self.disconnect_voice_client(server)
@@ -2067,7 +2103,7 @@ class MusicBot(discord.Client):
                 self.server_specific_data[after.server]['auto_paused'] = True
                 player.pause()
 
-    async def on_server_update(self, before:discord.Server, after:discord.Server):
+    async def on_server_update(self, before: discord.Server, after: discord.Server):
         if before.region != after.region:
             self.safe_print("[Servers] \"%s\" changed regions: %s -> %s" % (after.name, before.region, after.region))
 
