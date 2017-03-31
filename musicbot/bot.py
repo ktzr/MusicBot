@@ -73,6 +73,7 @@ class MusicBot(discord.Client):
         self.voice_client_move_lock = asyncio.Lock()
 
         self.config = Config(config_file)
+
         self.permissions = Permissions(perms_file, grant_all=[self.config.owner_id])
 
         self.blacklist = set(load_file(self.config.blacklist_file))
@@ -1775,6 +1776,22 @@ class MusicBot(discord.Client):
 
         await self.send_message(author, '\n'.join(lines))
         return Response(":mailbox_with_mail:", delete_after=20)
+
+    @owner_only
+    async def cmd_reloadperm(self, author, channel, server, permissions):
+        """
+        Usage:
+            {command_prefix}reloadperm
+
+        reloads the permissions file
+        """
+        try:
+            perms_file = PermissionsDefaults.perms_file
+            self.permissions = Permissions(perms_file, grant_all=[self.config.owner_id])
+            await self.send_message(author, ":ok_hand:")
+        except Exception as e:
+            raise exceptions.CommandError(e, expire_in=20)
+        return
 
 
     @owner_only
