@@ -1816,7 +1816,7 @@ class MusicBot(discord.Client):
             return Response(reply_text, reply=True, delete_after=20)
 
     @owner_only
-    async def cmd_reloadperm(self, author, channel, server, permissions):
+    async def cmd_reloadperm(self, author, message, server_link=None):
         """
         Usage:
             {command_prefix}reloadperm
