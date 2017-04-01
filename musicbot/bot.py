@@ -1976,8 +1976,9 @@ class MusicBot(discord.Client):
         if not handler:
             return
 
+        private_msg_list = ['joinserver','ban','reloadperm',',setavatar','instaskip','restart']
         if message.channel.is_private:
-            if not (message.author.id == self.config.owner_id and command == 'joinserver'):
+            if not (message.author.id == self.config.owner_id and command in private_msg_list):
                 await self.send_message(message.channel, 'You cannot use this bot in private messages.')
                 return
 
