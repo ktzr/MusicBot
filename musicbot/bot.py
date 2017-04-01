@@ -79,6 +79,8 @@ class MusicBot(discord.Client):
         self.autoplaylist = load_file(self.config.auto_playlist_file)
         self.downloader = downloader.Downloader(download_folder='audio_cache')
 
+        self.banned = set(load_file(self.config.banned_file))
+
         self.exit_signal = None
         self.init_ok = False
         self.cached_client_id = None
@@ -821,6 +823,46 @@ class MusicBot(discord.Client):
             return Response("%s's id is `%s`" % (usr.name, usr.id), reply=True, delete_after=35)
 
     @owner_only
+    async def cmd_ban(self, message, user_mentions, option, song_url):
+        """
+        Usage:
+            {command_prefix}ban [ + | - | add | remove ] url
+
+        Add or remove users to the blacklist.
+        Blacklisted users are forbidden from using bot commands.
+        """
+
+        song_url = song_url.strip('<>')
+
+        if option not in ['+', '-', 'add', 'remove']:
+            raise exceptions.CommandError(
+                'Invalid option "%s" specified, use +, -, add, or remove' % option, expire_in=20
+            )
+
+        if option in ['+', 'add']:
+            self.banned.update(song_url)
+
+            write_file(self.config.banned_file, self.banned)
+
+            return Response(
+                '%s has been added to the blacklist.' % (song_url),
+                reply=True, delete_after=10
+            )
+
+        else:
+            if self.banned.isdisjoint(song_url):
+                return Response('that song is not on the list.', reply=True, delete_after=10)
+
+            else:
+                self.banned.difference_update(song_url)
+                write_file(self.config.banned_file, self.banned)
+
+                return Response(
+                    '%s has been removed from the blacklist.' % (song_url),
+                    reply=True, delete_after=10
+                )
+
+    @owner_only
     async def cmd_joinserver(self, message, server_link=None):
         """
         Usage:
@@ -855,6 +897,9 @@ class MusicBot(discord.Client):
         """
 
         song_url = song_url.strip('<>')
+
+        if song_url in self.banned:
+            return Response("Mr Music says, NO!", delete_after=30)
 
         if permissions.max_songs and player.playlist.count_for_user(author) >= permissions.max_songs:
             raise exceptions.PermissionsError(
