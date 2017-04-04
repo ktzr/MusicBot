@@ -237,7 +237,7 @@ class MusicBot(discord.Client):
             await self.ws.voice_state(server.id, channel.id)
 
             s_id_data = await asyncio.wait_for(s_id, timeout=10, loop=self.loop)
-            voice_data = await asyncio.wait_for(_voice_data, timeout=10, loop=self.loop)
+            voice_data = await asyncio.wait_for(_voice_data, timeout=30, loop=self.loop)
             session_id = s_id_data.get('session_id')
 
             kwargs = {
@@ -308,12 +308,17 @@ class MusicBot(discord.Client):
 
         await asyncio.sleep(0.1)
 
-        if player:
-            new_vc = await self.get_voice_client(vc.channel)
-            player.reload_voice(new_vc)
+        try: #edit to solve kt crash
+            if player:
+                new_vc = await self.get_voice_client(vc.channel)
+                player.reload_voice(new_vc)
 
-            if player.is_paused and _paused:
-                player.resume()
+                if player.is_paused and _paused:
+                    player.resume()
+
+        except: ##if there is an error restart the server
+            await self.disconnect_all_voice_clients()
+            raise exceptions.RestartSignal
 
     async def disconnect_voice_client(self, server):
         if server.id not in self.the_voice_clients:
