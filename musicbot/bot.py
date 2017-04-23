@@ -949,6 +949,8 @@ class MusicBot(discord.Client):
                 return
 
             song_url = info['entries'][0]['webpage_url']
+            if song_url in self.banned:
+                return Response("Mr Music says, NO!", delete_after=30)
             info = await self.downloader.extract_info(player.playlist.loop, song_url, download=False, process=False)
             # Now I could just do: return await self.cmd_play(player, channel, author, song_url)
             # But this is probably fine
@@ -1381,6 +1383,22 @@ class MusicBot(discord.Client):
 
         if self.config.auto_playlist:
             await self.on_player_finished_playing(player)
+
+    async def cmd_summonkevin(self, channel, author, voice_channel):
+        """
+        Usage:
+            {command_prefix}summonkevin
+
+        Call mentions kein.
+        """
+
+        return Response(
+            '@kt#2112 they broke me again, please come fix me <3'.format(
+            ),
+            delete_after=20
+        )
+
+
 
     async def cmd_pause(self, player):
         """
