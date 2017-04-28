@@ -77,7 +77,7 @@ class MusicBot(discord.Client):
 
         self.blacklist = set(load_file(self.config.blacklist_file))
         self.autoplaylist = load_file(self.config.auto_playlist_file)
-        self.downloader = downloader.Downloader(download_folder='audio_cache')
+        self.downloader = downloader.Downloader(download_folder='../audio_cache')
 
         self.banned = set(load_file(self.config.banned_file))
 
@@ -1393,7 +1393,7 @@ class MusicBot(discord.Client):
         """
 
         return Response(
-            '@kt#2112 they broke me again, please come fix me <3'.format(
+            '**kt#2112**, **283348992249561090** they broke me again, please come fix me <3'.format(
             ),
             delete_after=20
         )
@@ -1918,7 +1918,7 @@ class MusicBot(discord.Client):
 
         return Response(":ok_hand:", delete_after=20)
 
-    @owner_only
+    #@owner_only
     async def cmd_setnick(self, server, channel, leftover_args, nick):
         """
         Usage:

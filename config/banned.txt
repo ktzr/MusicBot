@@ -1,2 +1,1 @@
-https://www.youtube.com/watch?v=a_jb46aU5MM
-https://www.youtube.com/watch?v=qclDfyIdMDk
+/home/kevin/botconfig/banned.txt
