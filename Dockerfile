@@ -28,5 +28,6 @@ RUN sudo pip install -r requirements.txt
 
 #Add volume for configuration
 VOLUME /musicBot/config
+VOLUME /musicBot/audio_cache
 
 CMD python3.5 run.py
