@@ -1099,11 +1099,9 @@ class MusicBot(discord.Client):
     async def cmd_serenadefabi(self, player, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
-            {command_prefix}play song_link
-            {command_prefix}play text to search for
-
-        Adds the song to the playlist.  If a link is not provided, the first
-        result from a youtube search is added to the queue.
+            {command_prefix}serenadefabi
+            
+            Serenades Fabi
         """
 
         song_url = "https://www.youtube.com/watch?v=fRh_vgS2dFE" #sorry jb
