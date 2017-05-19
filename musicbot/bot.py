@@ -828,10 +828,10 @@ class MusicBot(discord.Client):
             return Response("%s's id is `%s`" % (usr.name, usr.id), reply=True, delete_after=35)
 
     @owner_only
-    async def cmd_ban(self, message, user_mentions, option, song_url):
+    async def cmd_ban(self, player, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
-            {command_prefix}ban [ + | - | add | remove ] url
+            {command_prefix}ban [ + | - | add | remove ] song_link
 
         Add or remove users to the blacklist.
         Blacklisted users are forbidden from using bot commands.
