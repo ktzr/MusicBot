@@ -51,7 +51,6 @@ class Playlist(EventEmitter):
 
         return removed_entry
 
-
     async def add_entry(self, song_url, **meta):
         """
             Validates and adds a song_url to be played. This does not start the download of the song.
@@ -72,7 +71,8 @@ class Playlist(EventEmitter):
 
         # TODO: Sort out what happens next when this happens
         if info.get('_type', None) == 'playlist':
-            raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
+            raise WrongEntryTypeError("This is a playlist.", True,
+                                      info.get('webpage_url', None) or info.get('url', None))
 
         if info['extractor'] in ['generic', 'Dropbox']:
             try:
@@ -125,7 +125,8 @@ class Playlist(EventEmitter):
 
         # TODO: Sort out what happens next when this happens
         if info.get('_type', None) == 'playlist':
-            raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
+            raise WrongEntryTypeError("This is a playlist.", True,
+                                      info.get('webpage_url', None) or info.get('url', None))
 
         if info['extractor'] in ['generic', 'Dropbox']:
             try:
@@ -196,9 +197,12 @@ class Playlist(EventEmitter):
                         self.downloader.ytdl.prepare_filename(items),
                         **meta
                     )
-
-                    self._add_entry(entry)
-                    entry_list.append(entry)
+                    if not ((entry.title in "SHITTYFLUTED")
+                            or (entry.title in "shittyfluted")
+                            or (entry.title in "SHITTYFLUTE")
+                            or (entry.title in "shittyflute")):
+                        self._add_entry(entry)
+                        entry_list.append(entry)
                 except:
                     baditems += 1
                     # Once I know more about what's happening here I can add a proper message
@@ -306,7 +310,6 @@ class Playlist(EventEmitter):
         if self.peek() is entry:
             entry.get_ready_future()
 
-
     async def get_next_entry(self, predownload_next=True):
         """
             A coroutine which will return the next song or None if no songs left to play.
@@ -347,5 +350,3 @@ class Playlist(EventEmitter):
 
     def count_for_user(self, user):
         return sum(1 for e in self.entries if e.meta.get('author', None) == user)
-
-

@@ -1078,6 +1078,14 @@ class MusicBot(discord.Client):
             reply_text = "Enqueued **%s** to be played. Position in queue: %s"
             btext = entry.title
 
+
+            if (entry.title in self.banned) \
+                    or (entry.title in "SHITTYFLUTED") \
+                    or (entry.title in "shittyfluted") \
+                    or (entry.title in "SHITTYFLUTE") \
+                    or (entry.title in "shittyflute"):
+                return Response("Mr Music says, NO!", delete_after=30)
+
         if position == 1 and player.is_stopped:
             position = 'Up next!'
             reply_text %= (btext, position)
@@ -1565,8 +1573,6 @@ class MusicBot(discord.Client):
             ),
             delete_after=20
         )
-
-
 
     async def cmd_pause(self, player):
         """
