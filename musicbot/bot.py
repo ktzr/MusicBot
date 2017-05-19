@@ -828,7 +828,7 @@ class MusicBot(discord.Client):
             return Response("%s's id is `%s`" % (usr.name, usr.id), reply=True, delete_after=35)
 
     @owner_only
-    async def cmd_ban(self, player, channel, author, permissions, leftover_args, song_url):
+    async def cmd_ban(self, option, song_url):
         """
         Usage:
             {command_prefix}ban [ + | - | add | remove ] song_link
