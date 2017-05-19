@@ -308,7 +308,7 @@ class MusicBot(discord.Client):
 
         await asyncio.sleep(0.1)
 
-        try: #edit to solve kt crash
+        try:  # edit to solve kt crash
             if player:
                 new_vc = await self.get_voice_client(vc.channel)
                 player.reload_voice(new_vc)
@@ -316,7 +316,7 @@ class MusicBot(discord.Client):
                 if player.is_paused and _paused:
                     player.resume()
 
-        except: ##if there is an error restart the server
+        except:  ##if there is an error restart the server
             await self.disconnect_all_voice_clients()
             raise exceptions.RestartSignal
 
@@ -903,12 +903,19 @@ class MusicBot(discord.Client):
 
         song_url = song_url.strip('<>')
 
-
         if (song_url in self.banned) \
-                or (song_url in "SHITTYFLUTED")\
-                or (song_url in "shittyfluted")\
+                or (song_url in "SHITTYFLUTED") \
+                or (song_url in "shittyfluted") \
                 or (song_url in "SHITTYFLUTE") \
-                or (song_url in "shittyflute"):
+                or (song_url in "shittyflute") \
+                or ("SHITTYFLUTED" in song_url) \
+                or ("shittyfluted" in song_url) \
+                or ("SHITTYFLUTE" in song_url) \
+                or ("shittyflute" in song_url) \
+                or ("shittyflute" in str(song_url).lower()) \
+                or ("shitty" in str(song_url).lower() and "flute" in str(
+                    song_url).lower()):  # todo some redundacy but i realy hate shitty fluted
+
             return Response("Mr Music says, NO!", delete_after=30)
 
         if permissions.max_songs and player.playlist.count_for_user(author) >= permissions.max_songs:
@@ -1078,12 +1085,15 @@ class MusicBot(discord.Client):
             reply_text = "Enqueued **%s** to be played. Position in queue: %s"
             btext = entry.title
 
-
-            if (entry.title in self.banned) \
-                    or (entry.title in "SHITTYFLUTED") \
-                    or (entry.title in "shittyfluted") \
-                    or (entry.title in "SHITTYFLUTE") \
-                    or (entry.title in "shittyflute"):
+            str(btext).lower()
+            if (btext in self.banned) \
+                    or ("SHITTYFLUTED" in btext) \
+                    or ("shittyfluted" in btext) \
+                    or ("SHITTYFLUTE" in btext) \
+                    or ("shittyflute" in btext) \
+                    or ("shittyflute" in str(btext).lower()) \
+                    or ("shitty" in str(btext).lower() and "flute" in str(
+                        btext).lower()):  # todo some redundacy but i realy hate shitty fluted
                 return Response("Mr Music says, NO!", delete_after=30)
 
         if position == 1 and player.is_stopped:
@@ -1102,7 +1112,7 @@ class MusicBot(discord.Client):
 
         return Response(reply_text, delete_after=30)
 
-    #todo
+    # todo
     @owner_only
     async def cmd_serenadefabi(self, player, channel, author, permissions, leftover_args, song_url):
         """
@@ -1112,7 +1122,7 @@ class MusicBot(discord.Client):
             Serenades Fabi
         """
 
-        song_url = "https://www.youtube.com/watch?v=fRh_vgS2dFE" #sorry jb
+        song_url = "https://www.youtube.com/watch?v=fRh_vgS2dFE"  # sorry jb
 
         await self.send_typing(channel)
 
@@ -2046,7 +2056,6 @@ class MusicBot(discord.Client):
                     reply_text = "There aren't any songs in the queue!"
                     return Response(reply_text, reply=True, delete_after=20)
 
-
             entry = await player.playlist.remove_entry(index)
             reply_text = "Removed **%s** from the playlist"
             reply_text %= (entry.title)
@@ -2092,7 +2101,7 @@ class MusicBot(discord.Client):
 
         return Response(":ok_hand:", delete_after=20)
 
-    #@owner_only
+    # @owner_only
     async def cmd_setnick(self, server, channel, leftover_args, nick):
         """
         Usage:
@@ -2173,7 +2182,7 @@ class MusicBot(discord.Client):
         if not handler:
             return
 
-        private_msg_list = ['joinserver','ban','reloadperm',',setavatar','instaskip','restart']
+        private_msg_list = ['joinserver', 'ban', 'reloadperm', ',setavatar', 'instaskip', 'restart']
         if message.channel.is_private:
             if not (message.author.id == self.config.owner_id and command in private_msg_list):
                 await self.send_message(message.channel, 'You cannot use this bot in private messages.')
