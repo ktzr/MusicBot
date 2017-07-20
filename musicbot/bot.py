@@ -827,16 +827,17 @@ class MusicBot(discord.Client):
             return Response("%s's id is `%s`" % (usr.name, usr.id), reply=True, delete_after=35)
 
     @owner_only
-    async def cmd_ban(self, option, song_url):
+    async def cmd_ban(self, option, to_be_baned):
         """
         Usage:
-            {command_prefix}ban [ + | - | add | remove ] song_link
+            {command_prefix}ban [ + | - | add | remove ] to_be_baned
 
         Add or remove users to the blacklist.
         Blacklisted users are forbidden from using bot commands.
         """
 
-        song_url = song_url.strip('<>')
+        # song_url = song_url.strip('<>')
+        word = str(to_be_baned).lower()
 
         if option not in ['+', '-', 'add', 'remove']:
             raise exceptions.CommandError(
@@ -844,25 +845,25 @@ class MusicBot(discord.Client):
             )
 
         if option in ['+', 'add']:
-            self.banned.update(song_url)
+            self.banned.update(word)
 
             write_file(self.config.banned_file, self.banned)
 
             return Response(
-                '%s has been added to the blacklist.' % (song_url),
+                '%s has been added to the blacklist.' % (word),
                 reply=True, delete_after=10
             )
 
         else:
-            if self.banned.isdisjoint(song_url):
+            if self.banned.isdisjoint(word):
                 return Response('that song is not on the list.', reply=True, delete_after=10)
 
             else:
-                self.banned.difference_update(song_url)
+                self.banned.difference_update(word)
                 write_file(self.config.banned_file, self.banned)
 
                 return Response(
-                    '%s has been removed from the blacklist.' % (song_url),
+                    '%s has been removed from the blacklist.' % (word),
                     reply=True, delete_after=10
                 )
 
@@ -890,6 +891,15 @@ class MusicBot(discord.Client):
         except:
             raise exceptions.CommandError('Invalid URL provided:\n{}\n'.format(server_link), expire_in=30)
 
+    def is_baned(self,song):
+        if  ("shittyflute" in song) \
+            or ("shittyfluted" in song):
+            return True
+        for ban in self.banned:
+            if ban in song:
+                return True
+        return False
+
     async def cmd_play(self, player, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
@@ -902,19 +912,7 @@ class MusicBot(discord.Client):
 
         song_url = song_url.strip('<>')
 
-        if (song_url in self.banned) \
-                or (song_url in "SHITTYFLUTED") \
-                or (song_url in "shittyfluted") \
-                or (song_url in "SHITTYFLUTE") \
-                or (song_url in "shittyflute") \
-                or ("SHITTYFLUTED" in song_url) \
-                or ("shittyfluted" in song_url) \
-                or ("SHITTYFLUTE" in song_url) \
-                or ("shittyflute" in song_url) \
-                or ("shittyflute" in str(song_url).lower()) \
-                or ("shitty" in str(song_url).lower() and "flute" in str(
-                    song_url).lower()):  # todo some redundacy but i realy hate shitty fluted
-
+        if self.is_baned(song_url):
             return Response("Mr Music says, NO!", delete_after=30)
 
         if permissions.max_songs and player.playlist.count_for_user(author) >= permissions.max_songs:
@@ -1069,6 +1067,8 @@ class MusicBot(discord.Client):
                 )
 
             try:
+                if self.is_baned(player.playlist.get_song_title(song_url)):
+                    return Response("Mr Music says, NO!", delete_after=30)
                 entry, position = await player.playlist.add_entry(song_url, channel=channel, author=author)
 
             except exceptions.WrongEntryTypeError as e:
@@ -1084,16 +1084,6 @@ class MusicBot(discord.Client):
             reply_text = "Enqueued **%s** to be played. Position in queue: %s"
             btext = entry.title
 
-            str(btext).lower()
-            if (btext in self.banned) \
-                    or ("SHITTYFLUTED" in btext) \
-                    or ("shittyfluted" in btext) \
-                    or ("SHITTYFLUTE" in btext) \
-                    or ("shittyflute" in btext) \
-                    or ("shittyflute" in str(btext).lower()) \
-                    or ("shitty" in str(btext).lower() and "flute" in str(
-                        btext).lower()):  # todo some redundacy but i realy hate shitty fluted
-                return Response("Mr Music says, NO!", delete_after=30)
 
         if position == 1 and player.is_stopped:
             position = 'Up next!'
@@ -1111,17 +1101,18 @@ class MusicBot(discord.Client):
 
         return Response(reply_text, delete_after=30)
 
+
+
     # todo
     @owner_only
-    async def cmd_serenadefabi(self, player, channel, author, permissions, leftover_args, song_url):
+    async def cmd_forceplay(self, player, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
-            {command_prefix}serenadefabi
-            
+            {command_prefix}play song_link
+            {command_prefix}play text to search for
+
             Serenades Fabi
         """
-
-        song_url = "https://www.youtube.com/watch?v=fRh_vgS2dFE"  # sorry jb
 
         await self.send_typing(channel)
 
