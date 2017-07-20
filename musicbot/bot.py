@@ -763,7 +763,6 @@ class MusicBot(discord.Client):
 
             helpmsg += ", ".join(commands)
             helpmsg += "```"
-            helpmsg += "https://github.com/SexualRhinoceros/MusicBot/wiki/Commands-list"
 
             return Response(helpmsg, reply=True, delete_after=60)
 
@@ -2080,7 +2079,7 @@ class MusicBot(discord.Client):
             await self.send_message(author, ":ok_hand:")
         except Exception as e:
             raise exceptions.CommandError(e, expire_in=20)
-        return
+        return Response(":ok_hand:", reply=True)
 
     @owner_only
     async def cmd_setname(self, leftover_args, name):
