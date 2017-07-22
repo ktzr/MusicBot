@@ -892,9 +892,9 @@ class MusicBot(discord.Client):
             raise exceptions.CommandError('Invalid URL provided:\n{}\n'.format(server_link), expire_in=30)
 
     def is_baned(self,song):
-        if  ("shittyflute" in song) \
-            or ("shittyfluted" in song):
-            return True
+        # if  ("shittyflute" in song) \
+        #     or ("shittyfluted" in song):
+        #     return True
         for ban in self.banned:
             if ban in song:
                 return True
