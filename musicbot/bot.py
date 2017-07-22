@@ -912,7 +912,7 @@ class MusicBot(discord.Client):
 
         song_url = song_url.strip('<>')
 
-        if self.is_baned(song_url):
+        if self.is_baned(str(song_url)):
             return Response("Mr Music says, NO!", delete_after=30)
 
         if permissions.max_songs and player.playlist.count_for_user(author) >= permissions.max_songs:
@@ -1067,7 +1067,8 @@ class MusicBot(discord.Client):
                 )
 
             try:
-                if self.is_baned(player.playlist.get_song_title(song_url)):
+                title = await player.playlist.get_song_title(song_url)
+                if self.is_baned(title):
                     return Response("Mr Music says, NO!", delete_after=30)
                 entry, position = await player.playlist.add_entry(song_url, channel=channel, author=author)
 
