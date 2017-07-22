@@ -1108,8 +1108,8 @@ class MusicBot(discord.Client):
     async def cmd_forceplay(self, player, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
-            {command_prefix}play song_link
-            {command_prefix}play text to search for
+            {command_prefix}forceplay song_link
+            {command_prefix}forceplay text to search for
 
             Serenades Fabi
         """
