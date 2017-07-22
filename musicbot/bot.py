@@ -845,7 +845,7 @@ class MusicBot(discord.Client):
             )
 
         if option in ['+', 'add']:
-            self.banned.update(word)
+            self.banned.update([word])
 
             write_file(self.config.banned_file, self.banned)
 
@@ -855,11 +855,11 @@ class MusicBot(discord.Client):
             )
 
         else:
-            if self.banned.isdisjoint(word):
+            if self.banned.isdisjoint([word]):
                 return Response('that song is not on the list.', reply=True, delete_after=10)
 
             else:
-                self.banned.difference_update(word)
+                self.banned.difference_update([word])
                 write_file(self.config.banned_file, self.banned)
 
                 return Response(
