@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-MAINTAINER Sidesplitter, https://github.com/SexualRhinoceros/MusicBot
+MAINTAINER kevin, https://github.com/thekevinchi/joinbot
 
 #Install dependencies
 RUN sudo apt-get update \
@@ -30,4 +30,4 @@ RUN sudo pip install -r requirements.txt
 VOLUME /musicBot/config
 VOLUME /musicBot/audio_cache
 
-CMD python3.5 run.py
+CMD bash run.sh
