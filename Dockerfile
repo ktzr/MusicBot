@@ -1,30 +1,28 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 MAINTAINER kevin, https://github.com/thekevinchi/joinbot
 
 #Install dependencies
-RUN sudo apt-get update \
-    && sudo apt-get install software-properties-common -y \
-    && sudo add-apt-repository ppa:fkrull/deadsnakes -y \
-    && sudo add-apt-repository ppa:mc3man/trusty-media -y \
-    && sudo apt-get update -y \
-    && sudo apt-get install build-essential unzip -y \
-    && sudo apt-get install python3.5 python3.5-dev -y \
-    && sudo apt-get install ffmpeg -y \
-    && sudo apt-get install libopus-dev -y \
-    && sudo apt-get install libffi-dev -y
+RUN apt-get update \
+    && apt-get install build-essential unzip -y \
+    && apt-get install software-properties-common -y \
+    && apt-get install ffmpeg -y \
+    && apt-get install libopus-dev -y \
+    && apt-get install libffi-dev -y \
+    && apt-get install libsodium-dev -y \
+    && apt-get install python3-pip -y \
+    && apt-get upgrade -y
 
-#Install Pip
-RUN sudo apt-get install wget \
-    && wget https://bootstrap.pypa.io/get-pip.py \
-    && sudo python3.5 get-pip.py
+
+#Install PIP dependencies
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
 
 #Add musicBot
 ADD . /musicBot
 WORKDIR /musicBot
 
-#Install PIP dependencies
-RUN sudo pip install -r requirements.txt
 
 #Add volume for configuration
 VOLUME /musicBot/config
