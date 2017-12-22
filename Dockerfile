@@ -14,14 +14,14 @@ RUN apt-get update \
     && apt-get upgrade -y
 
 
-#Install PIP dependencies
-#RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
-
-
 #Add musicBot
 ADD . /musicBot
 WORKDIR /musicBot
+
+
+#Install PIP dependencies
+#RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
 
 #Add volume for configuration
