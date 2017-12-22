@@ -1,31 +1,20 @@
-FROM ubuntu:16.04
+FROM alpine:3.4
 
 MAINTAINER kevin, https://github.com/thekevinchi/joinbot
 
-#Install dependencies
-RUN apt-get update \
-    && apt-get install build-essential unzip -y \
-    && apt-get install software-properties-common -y \
-    && apt-get install ffmpeg -y \
-    && apt-get install libopus-dev -y \
-    && apt-get install libffi-dev -y \
-    && apt-get install libsodium-dev -y \
-    && apt-get install python3-pip -y \
-    && apt-get upgrade -y
+# Install Dependencies
+RUN apk update \
+ && apk add python3-dev ca-certificates gcc make linux-headers musl-dev ffmpeg libffi-dev
 
+# Add project source
+ADD . /usr/src/MusicBot
+WORKDIR /usr/src/MusicBot
 
-#Add musicBot
-ADD . /musicBot
-WORKDIR /musicBot
+# Create volume for mapping the config
+VOLUME /usr/src/MusicBot/config
+VOLUME /usr/src/MusicBot/audio_cache
 
-
-#Install PIP dependencies
-#RUN pip3 install --upgrade pip
+# Install pip dependencies
 RUN pip3 install -r requirements.txt
 
-
-#Add volume for configuration
-VOLUME /musicBot/config
-VOLUME /musicBot/audio_cache
-
-CMD bash run.sh
+CMD python3.5 run.py
