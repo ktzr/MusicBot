@@ -1,6 +1,6 @@
 ## Forked from [SexualRhinoceros](https://github.com/SexualRhinoceros/MusicBot)
 
-If you would like to add a new feature, please make an Issue or DM me on discord
+If you would like to add a new feature, please make an Issue.
 
 MusicBot is a Discord music bot written in [Python](https://www.python.org "Python homepage"). It plays requested songs and if the queue becomes empty it will play through a list of existing songs.
 
