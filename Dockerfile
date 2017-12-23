@@ -13,6 +13,9 @@ WORKDIR /usr/src/MusicBot
 # Create volume for mapping the config
 VOLUME /usr/src/MusicBot/config
 VOLUME /usr/src/MusicBot/audio_cache
+VOLUME /usr/src/MusicBot/data
+VOLUME /usr/src/MusicBot/logs
+
 
 # Install pip dependencies
 RUN pip3 install -r requirements.txt
