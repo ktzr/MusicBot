@@ -2043,7 +2043,7 @@ class MusicBot(discord.Client):
         """
 
         return Response(
-            '<@!283348992249561090> they broke me again, please come fix me <3'.format(
+            '<@283348992249561090> they broke me again, please come fix me <3'.format(
             ),
             delete_after=20
         )
