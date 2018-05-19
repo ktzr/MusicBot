@@ -317,9 +317,6 @@ def pyexec(pycom, *args, pycom2=None):
     pycom2 = pycom2 or pycom
     os.execlp(pycom, pycom2, *args)
 
-def restart(*args):
-    pyexec(sys.executable, *args, *sys.argv, pycom2='python')
-
 
 def main():
     # TODO: *actual* argparsing
@@ -390,7 +387,7 @@ def main():
                     break
 
                 elif e.__class__.__name__ == "RestartSignal":
-                    restart()
+                    exit(1)
             else:
                 log.exception("Error starting bot")
 
