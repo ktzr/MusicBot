@@ -348,63 +348,64 @@ def main():
             sh.terminator = '\n'
 
             m.run()
+        except:
+            exit(1)
+        # except SyntaxError:
+        #     log.exception("Syntax error (this is a bug, not your fault)")
+        #     break
 
-        except SyntaxError:
-            log.exception("Syntax error (this is a bug, not your fault)")
-            break
+        # except ImportError:
+        #     # TODO: if error module is in pip or dpy requirements...
+        #
+        #     if not tried_requirementstxt:
+        #         tried_requirementstxt = True
+        #
+        #         log.exception("Error starting bot")
+        #         log.info("Attempting to install dependencies...")
+        #
+        #         err = PIP.run_install('--upgrade -r requirements.txt')
+        #
+        #         if err: # TODO: add the specific error check back as not to always tell users to sudo it
+        #             print()
+        #             log.critical("You may need to %s to install dependencies." %
+        #                          ['use sudo', 'run as admin'][sys.platform.startswith('win')])
+        #             break
+        #         else:
+        #             print()
+        #             log.info("Ok lets hope it worked")
+        #             print()
+        #     else:
+        #         log.exception("Unknown ImportError, exiting.")
+        #         break
 
-        except ImportError:
-            # TODO: if error module is in pip or dpy requirements...
+        # except Exception as e:
+        #     if hasattr(e, '__module__') and e.__module__ == 'musicbot.exceptions':
+        #         if e.__class__.__name__ == 'HelpfulError':
+        #             log.info(e.message)
+        #             break
+        #
+        #         elif e.__class__.__name__ == "TerminateSignal":
+        #             break
+        #
+        #         elif e.__class__.__name__ == "RestartSignal":
+        #             exit(1)
+        #     else:
+        #         log.exception("Error starting bot")
 
-            if not tried_requirementstxt:
-                tried_requirementstxt = True
-
-                log.exception("Error starting bot")
-                log.info("Attempting to install dependencies...")
-
-                err = PIP.run_install('--upgrade -r requirements.txt')
-
-                if err: # TODO: add the specific error check back as not to always tell users to sudo it
-                    print()
-                    log.critical("You may need to %s to install dependencies." %
-                                 ['use sudo', 'run as admin'][sys.platform.startswith('win')])
-                    break
-                else:
-                    print()
-                    log.info("Ok lets hope it worked")
-                    print()
-            else:
-                log.exception("Unknown ImportError, exiting.")
-                break
-
-        except Exception as e:
-            if hasattr(e, '__module__') and e.__module__ == 'musicbot.exceptions':
-                if e.__class__.__name__ == 'HelpfulError':
-                    log.info(e.message)
-                    break
-
-                elif e.__class__.__name__ == "TerminateSignal":
-                    break
-
-                elif e.__class__.__name__ == "RestartSignal":
-                    exit(1)
-            else:
-                log.exception("Error starting bot")
-
-        finally:
-            if not m or not m.init_ok:
-                if any(sys.exc_info()):
-                    # How to log this without redundant messages...
-                    traceback.print_exc()
-                break
-
-            asyncio.set_event_loop(asyncio.new_event_loop())
-            loops += 1
-
-        sleeptime = min(loops * 2, max_wait_time)
-        if sleeptime:
-            log.info("Restarting in {} seconds...".format(loops*2))
-            time.sleep(sleeptime)
+        # finally:
+        #     if not m or not m.init_ok:
+        #         if any(sys.exc_info()):
+        #             # How to log this without redundant messages...
+        #             traceback.print_exc()
+        #         break
+        #
+        #     asyncio.set_event_loop(asyncio.new_event_loop())
+        #     loops += 1
+        #
+        # sleeptime = min(loops * 2, max_wait_time)
+        # if sleeptime:
+        #     log.info("Restarting in {} seconds...".format(loops*2))
+        #     time.sleep(sleeptime)
 
     print()
     log.info("All done.")
