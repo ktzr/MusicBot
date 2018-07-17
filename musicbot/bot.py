@@ -959,25 +959,26 @@ class MusicBot(discord.Client):
     def run(self):
         try:
             self.loop.run_until_complete(self.start(*self.config.auth))
-
-        except discord.errors.LoginFailure:
-            # Add if token, else
-            raise exceptions.HelpfulError(
-                "Bot cannot login, bad credentials.",
-                "Fix your %s in the options file.  "
-                "Remember that each field should be on their own line."
-                % ['shit', 'Token', 'Email/Password', 'Credentials'][len(self.config.auth)]
-            ) #     ^^^^ In theory self.config.auth should never have no items
-
-        finally:
-            try:
-                self._cleanup()
-            except Exception:
-                log.error("Error in cleanup", exc_info=True)
-
-            self.loop.close()
-            if self.exit_signal:
-                raise self.exit_signal
+        except:
+            exit(1)
+        # except discord.errors.LoginFailure:
+        #     # Add if token, else
+        #     raise exceptions.HelpfulError(
+        #         "Bot cannot login, bad credentials.",
+        #         "Fix your %s in the options file.  "
+        #         "Remember that each field should be on their own line."
+        #         % ['shit', 'Token', 'Email/Password', 'Credentials'][len(self.config.auth)]
+        #     ) #     ^^^^ In theory self.config.auth should never have no items
+        #
+        # finally:
+        #     try:
+        #         self._cleanup()
+        #     except Exception:
+        #         log.error("Error in cleanup", exc_info=True)
+        #
+        #     self.loop.close()
+        #     if self.exit_signal:
+        #         raise self.exit_signal
 
     async def logout(self):
         await self.disconnect_all_voice_clients()
