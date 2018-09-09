@@ -1,14 +1,39 @@
-FROM alpine:3.4
+FROM alpine:edge
 
 MAINTAINER kevin, https://github.com/thekevinchi/joinbot
 
-# Install Dependencies
-RUN apk update \
- && apk add python3-dev ca-certificates gcc make linux-headers musl-dev ffmpeg libffi-dev
 
 # Add project source
 ADD . /usr/src/MusicBot
 WORKDIR /usr/src/MusicBot
+COPY . ./
+
+# Install dependencies
+RUN apk update \
+&& apk add --no-cache \
+  ca-certificates \
+  ffmpeg \
+  opus \
+  python3 \
+  libsodium-dev \
+\
+# Install build dependencies
+&& apk add --no-cache --virtual .build-deps \
+  gcc \
+  git \
+  libffi-dev \
+  make \
+  musl-dev \
+  python3-dev \
+\
+
+
+# Install pip dependencies
+&& pip3 install --no-cache-dir -r requirements.txt \
+&& pip3 install --upgrade --force-reinstall --version websockets==4.0.1 \
+\
+# Clean up build dependencies
+&& apk del .build-deps
 
 # Create volume for mapping the config
 VOLUME /usr/src/MusicBot/config
@@ -16,8 +41,6 @@ VOLUME /usr/src/MusicBot/audio_cache
 VOLUME /usr/src/MusicBot/data
 VOLUME /usr/src/MusicBot/logs
 
+ENV APP_ENV=docker
 
-# Install pip dependencies
-RUN pip3 install -r requirements.txt
-
-CMD python3.5 run.py
+ENTRYPOINT ["python3", "run.py"]

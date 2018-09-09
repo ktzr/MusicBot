@@ -41,26 +41,19 @@ class Playlist(EventEmitter, Serializable):
 
     def clear(self):
         self.entries.clear()
+        
+    def get_entry_at_index(self, index):
+        self.entries.rotate(-index)
+        entry = self.entries[0]
+        self.entries.rotate(index)
+        return entry
+        
+    def delete_entry_at_index(self, index):
+        self.entries.rotate(-index)
+        entry = self.entries.popleft()
+        self.entries.rotate(index)
+        return entry
 
-    async def remove_entry(self, index):
-        """
-            Removes a song from the playlist.
-            :param index: The index of the song to remove from the queue.
-        """
-
-        removed_entries = deque()
-
-        if index == 1:
-            return self.entries.popleft()
-
-        for i in range(1, index):
-            removed_entries.appendleft(self.entries.popleft())
-        removed_entry = self.entries.popleft()
-
-        for entry in removed_entries:
-            self.entries.appendleft(entry)
-
-        return removed_entry
 
     async def add_entry(self, song_url, **meta):
         """
@@ -82,8 +75,7 @@ class Playlist(EventEmitter, Serializable):
 
         # TODO: Sort out what happens next when this happens
         if info.get('_type', None) == 'playlist':
-            raise WrongEntryTypeError("This is a playlist.", True,
-                                      info.get('webpage_url', None) or info.get('url', None))
+            raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
 
         if info.get('is_live', False):
             return await self.add_stream_entry(song_url, info=info, **meta)
@@ -131,14 +123,14 @@ class Playlist(EventEmitter, Serializable):
                 info = await self.downloader.extract_info(self.loop, song_url, download=False)
 
             except DownloadError as e:
-                if e.exc_info[0] == UnsupportedError: # ytdl doesn't like it but its probably a stream
+                if e.exc_info[0] == UnsupportedError:  # ytdl doesn't like it but its probably a stream
                     log.debug("Assuming content is a direct stream")
 
                 elif e.exc_info[0] == URLError:
                     if os.path.exists(os.path.abspath(song_url)):
                         raise ExtractionError("This is not a stream, this is a file path.")
 
-                    else: # it might be a file path that just doesn't exist
+                    else:  # it might be a file path that just doesn't exist
                         raise ExtractionError("Invalid input: {0.exc_info[0]}: {0.exc_info[1].reason}".format(e))
 
                 else:
@@ -148,11 +140,14 @@ class Playlist(EventEmitter, Serializable):
             except Exception as e:
                 log.error('Could not extract information from {} ({}), falling back to direct'.format(song_url, e), exc_info=True)
 
+        if info.get('is_live') is None and info.get('extractor', None) is not 'generic':  # wew hacky
+            raise ExtractionError("This is not a stream.")
+
         dest_url = song_url
         if info.get('extractor'):
             dest_url = info.get('url')
 
-        if info.get('extractor', None) == 'twitch:stream': # may need to add other twitch types
+        if info.get('extractor', None) == 'twitch:stream':  # may need to add other twitch types
             title = info.get('description')
         else:
             title = info.get('title', 'Untitled')
@@ -168,70 +163,6 @@ class Playlist(EventEmitter, Serializable):
         )
         self._add_entry(entry)
         return entry, len(self.entries)
-
-    async def get_song_title(self,song_url):
-        try:
-            info = await self.downloader.extract_info(self.loop, song_url, download=False)
-        except Exception as e:
-            raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
-        if not info:
-            raise ExtractionError('Could not extract information from %s' % song_url)
-        return str(info.get('title', 'Untitled')).lower()
-
-
-    async def add_entry_front(self, song_url, **meta):
-        """
-            Validates and adds a song_url to be played. This does not start the download of the song.
-
-            Returns the entry & the position it is in the queue.
-
-            :param song_url: The song url to add to the playlist.
-            :param meta: Any additional metadata to add to the playlist entry.
-        """
-
-        try:
-            info = await self.downloader.extract_info(self.loop, song_url, download=False)
-        except Exception as e:
-            raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
-
-        if not info:
-            raise ExtractionError('Could not extract information from %s' % song_url)
-
-        # TODO: Sort out what happens next when this happens
-        if info.get('_type', None) == 'playlist':
-            raise WrongEntryTypeError("This is a playlist.", True,
-                                      info.get('webpage_url', None) or info.get('url', None))
-
-        if info['extractor'] in ['generic', 'Dropbox']:
-            try:
-                # unfortunately this is literally broken
-                # https://github.com/KeepSafe/aiohttp/issues/758
-                # https://github.com/KeepSafe/aiohttp/issues/852
-                content_type = await get_header(self.bot.aiosession, info['url'], 'CONTENT-TYPE')
-                print("Got content type", content_type)
-
-            except Exception as e:
-                print("[Warning] Failed to get content type for url %s (%s)" % (song_url, e))
-                content_type = None
-
-            if content_type:
-                if content_type.startswith(('application/', 'image/')):
-                    if '/ogg' not in content_type:  # How does a server say `application/ogg` what the actual fuck
-                        raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
-
-                elif not content_type.startswith(('audio/', 'video/')):
-                    print("[Warning] Questionable content type \"%s\" for url %s" % (content_type, song_url))
-
-        entry = URLPlaylistEntry(
-            self,
-            song_url,
-            info.get('title', 'Untitled'),
-            info.get('duration', 0) or 0,
-            self.downloader.ytdl.prepare_filename(info),
-            **meta
-        )
-        self._add_entry_front(entry)
-        return entry, 1
 
     async def import_from(self, playlist_url, **meta):
         """
@@ -271,12 +202,9 @@ class Playlist(EventEmitter, Serializable):
                         self.downloader.ytdl.prepare_filename(item),
                         **meta
                     )
-                    if not ((entry.title in "SHITTYFLUTED")
-                            or (entry.title in "shittyfluted")
-                            or (entry.title in "SHITTYFLUTE")
-                            or (entry.title in "shittyflute")):
-                        self._add_entry(entry)
-                        entry_list.append(entry)
+
+                    self._add_entry(entry)
+                    entry_list.append(entry)
                 except Exception as e:
                     baditems += 1
                     log.warning("Could not add item", exc_info=e)
@@ -383,12 +311,8 @@ class Playlist(EventEmitter, Serializable):
         if self.peek() is entry:
             entry.get_ready_future()
 
-    def _add_entry_front(self, entry):
-        self.entries.appendleft(entry)
-        self.emit('entry-added', playlist=self, entry=entry)
-
-        if self.peek() is entry:
-            entry.get_ready_future()
+    def remove_entry(self, index):
+        del self.entries[index]
 
     async def get_next_entry(self, predownload_next=True):
         """
