@@ -54,6 +54,14 @@ class Playlist(EventEmitter, Serializable):
         self.entries.rotate(index)
         return entry
 
+    async def get_song_title(self,song_url):
+        try:
+            info = await self.downloader.extract_info(self.loop, song_url, download=False)
+        except Exception as e:
+            raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
+        if not info:
+            raise ExtractionError('Could not extract information from %s' % song_url)
+        return str(info.get('title', 'Untitled')).lower()
 
     async def add_entry(self, song_url, **meta):
         """
