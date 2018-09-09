@@ -2683,7 +2683,7 @@ class MusicBot(discord.Client):
                     reply_text = "There aren't any songs in the queue!"
                     return Response(reply_text, reply=True, delete_after=20)
 
-            entry = await player.playlist.remove_entry(index)
+            entry = await player.playlist.remove_entry(index +1)
             reply_text = "Removed **%s** from the playlist"
             reply_text %= (entry.title)
 
