@@ -79,7 +79,7 @@ class HelpfulError(MusicbotException):
         )
 
     @staticmethod
-    def _pretty_wrap(text, pretext, *, width=-1):
+    def _pretty_wrap(text, pretext, *, width=60):
         if width is None:
             return '\n'.join((pretext.strip(), text))
         elif width == -1:
