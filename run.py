@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from __future__ import print_function
 
 import os
@@ -9,6 +11,7 @@ import traceback
 import subprocess
 
 from shutil import disk_usage, rmtree
+from base64 import b64decode
 
 try:
     import pathlib
@@ -199,6 +202,9 @@ def sanity_checks(optional=True):
     # Make our folders if needed
     req_ensure_folders()
 
+    # For rewrite only
+    req_check_deps()
+
     log.info("Required checks passed.")
 
     ## Optional
@@ -257,6 +263,17 @@ def req_ensure_py3():
         bugger_off()
 
 
+def req_check_deps():
+    try:
+        import discord
+        if discord.version_info.major < 1:
+            log.critical("This version of MusicBot requires a newer version of discord.py (1.0+). Your version is {0}. Try running update.py.".format(discord.__version__))
+            bugger_off()
+    except ImportError:
+        # if we can't import discord.py, an error will be thrown later down the line anyway
+        pass
+
+
 def req_ensure_encoding():
     log.info("Checking console encoding")
 
@@ -276,10 +293,13 @@ def req_ensure_encoding():
 def req_ensure_env():
     log.info("Ensuring we're in the right environment")
 
+    if os.environ.get('APP_ENV') != 'docker' and not os.path.isdir(b64decode('LmdpdA==').decode('utf-8')):
+        log.critical(b64decode('Qm90IHdhc24ndCBpbnN0YWxsZWQgdXNpbmcgR2l0LiBSZWluc3RhbGwgdXNpbmcgaHR0cDovL2JpdC5seS9tdXNpY2JvdGRvY3Mu').decode('utf-8'))
+        bugger_off()
+
     try:
         assert os.path.isdir('config'), 'folder "config" not found'
         assert os.path.isdir('musicbot'), 'folder "musicbot" not found'
-        assert os.path.isdir('.git'), 'bot was not installed using Git. If you downloaded a ZIP, you did it wrong. Open http://bit.ly/dmbguide on your browser for official install steps.'
         assert os.path.isfile('musicbot/__init__.py'), 'musicbot folder is not a Python module'
 
         assert importlib.util.find_spec('musicbot'), "musicbot module is not importable"
@@ -328,6 +348,10 @@ def main():
 
     import asyncio
 
+    if sys.platform == 'win32':
+        loop = asyncio.ProactorEventLoop()  # needed for subprocesses
+        asyncio.set_event_loop(loop)
+
     tried_requirementstxt = False
     tryagain = True
 
@@ -344,68 +368,67 @@ def main():
             m = MusicBot()
 
             sh.terminator = ''
-            log.info("Connecting")
             sh.terminator = '\n'
 
             m.run()
-        except:
-            exit(1)
-        # except SyntaxError:
-        #     log.exception("Syntax error (this is a bug, not your fault)")
-        #     break
 
-        # except ImportError:
-        #     # TODO: if error module is in pip or dpy requirements...
-        #
-        #     if not tried_requirementstxt:
-        #         tried_requirementstxt = True
-        #
-        #         log.exception("Error starting bot")
-        #         log.info("Attempting to install dependencies...")
-        #
-        #         err = PIP.run_install('--upgrade -r requirements.txt')
-        #
-        #         if err: # TODO: add the specific error check back as not to always tell users to sudo it
-        #             print()
-        #             log.critical("You may need to %s to install dependencies." %
-        #                          ['use sudo', 'run as admin'][sys.platform.startswith('win')])
-        #             break
-        #         else:
-        #             print()
-        #             log.info("Ok lets hope it worked")
-        #             print()
-        #     else:
-        #         log.exception("Unknown ImportError, exiting.")
-        #         break
+        except SyntaxError:
+            log.exception("Syntax error (this is a bug, not your fault)")
+            break
 
-        # except Exception as e:
-        #     if hasattr(e, '__module__') and e.__module__ == 'musicbot.exceptions':
-        #         if e.__class__.__name__ == 'HelpfulError':
-        #             log.info(e.message)
-        #             break
-        #
-        #         elif e.__class__.__name__ == "TerminateSignal":
-        #             break
-        #
-        #         elif e.__class__.__name__ == "RestartSignal":
-        #             exit(1)
-        #     else:
-        #         log.exception("Error starting bot")
+        except ImportError:
+            # TODO: if error module is in pip or dpy requirements...
 
-        # finally:
-        #     if not m or not m.init_ok:
-        #         if any(sys.exc_info()):
-        #             # How to log this without redundant messages...
-        #             traceback.print_exc()
-        #         break
-        #
-        #     asyncio.set_event_loop(asyncio.new_event_loop())
-        #     loops += 1
-        #
-        # sleeptime = min(loops * 2, max_wait_time)
-        # if sleeptime:
-        #     log.info("Restarting in {} seconds...".format(loops*2))
-        #     time.sleep(sleeptime)
+            if not tried_requirementstxt:
+                tried_requirementstxt = True
+
+                log.exception("Error starting bot")
+                log.info("Attempting to install dependencies...")
+
+                err = PIP.run_install('--upgrade -r requirements.txt')
+
+                if err: # TODO: add the specific error check back as not to always tell users to sudo it
+                    print()
+                    log.critical("You may need to %s to install dependencies." %
+                                 ['use sudo', 'run as admin'][sys.platform.startswith('win')])
+                    break
+                else:
+                    print()
+                    log.info("Ok lets hope it worked")
+                    print()
+            else:
+                log.exception("Unknown ImportError, exiting.")
+                break
+
+        except Exception as e:
+            if hasattr(e, '__module__') and e.__module__ == 'musicbot.exceptions':
+                if e.__class__.__name__ == 'HelpfulError':
+                    log.info(e.message)
+                    break
+
+                elif e.__class__.__name__ == "TerminateSignal":
+                    break
+
+                elif e.__class__.__name__ == "RestartSignal":
+                    loops = 0
+                    pass
+            else:
+                log.exception("Error starting bot")
+
+        finally:
+            if not m or not m.init_ok:
+                if any(sys.exc_info()):
+                    # How to log this without redundant messages...
+                    traceback.print_exc()
+                break
+
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loops += 1
+
+        sleeptime = min(loops * 2, max_wait_time)
+        if sleeptime:
+            log.info("Restarting in {} seconds...".format(loops*2))
+            time.sleep(sleeptime)
 
     print()
     log.info("All done.")
