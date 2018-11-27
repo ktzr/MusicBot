@@ -1,6 +1,7 @@
 FROM alpine:edge
 
 # Add project source
+ADD . /usr/src/MusicBot
 WORKDIR /usr/src/musicbot
 COPY . ./
 
