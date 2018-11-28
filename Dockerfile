@@ -1,7 +1,6 @@
 FROM alpine:edge
 
 # Add project source
-ADD . /usr/src/MusicBot
 WORKDIR /usr/src/musicbot
 COPY . ./
 
@@ -33,10 +32,10 @@ RUN apk update \
 
 
 # Create volume for mapping the config
-VOLUME /usr/src/MusicBot/config
-VOLUME /usr/src/MusicBot/audio_cache
-VOLUME /usr/src/MusicBot/data
-VOLUME /usr/src/MusicBot/logs
+VOLUME /usr/src/musicbot/config
+VOLUME /usr/src/musicbot/audio_cache
+VOLUME /usr/src/musicbot/data
+VOLUME /usr/src/musicbot/logs
 
 
 ENV APP_ENV=docker

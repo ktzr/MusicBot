@@ -110,14 +110,6 @@ _add_logger_level('VOICEDEBUG', 6)
 log = logging.getLogger(__name__)
 log.setLevel(logging.EVERYTHING)
 
-fhandler = logging.FileHandler(filename='logs/musicbot.log', encoding='utf-8', mode='a')
-fhandler.setFormatter(logging.Formatter(
-    "[{relativeCreated:.16f}] {asctime} - {levelname} - {name} | "
-    "In {filename}::{threadName}({thread}), line {lineno} in {funcName}: {message}",
-    style='{'
-))
-log.addHandler(fhandler)
 
 del _func_prototype
 del _add_logger_level
-del fhandler

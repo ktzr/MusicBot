@@ -3,12 +3,13 @@ audio_cache/
 bin/
 data/
 logs/
+config/
 musicbot/__pycache__/
 musicbot/lib/__pycache__/
 
 # Docker
 .dockerignore
-Dockerfile
+#Dockerfile
 
 # Git
 .git/
